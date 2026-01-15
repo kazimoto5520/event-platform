@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  SCANNER
+}
+
+enum EventStatus {
+  DRAFT
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum InvitationStatus {
+  CREATED
+  SENT
+  CHECKED_IN
+  CANCELLED
+  EXPIRED
+}
+
+enum TicketType {
+  REGULAR
+  VIP
+  STAFF
+  FREE
+  SINGLE
+  DOUBLE
+}
+
+enum ScanResult {
+  SUCCESS
+  DUPLICATE
+  INVALID
+  EXPIRED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  fullName  String   @map("full_name")
+  phone     String   @unique
+  password  String   @map("password")
+  phoneVerified Boolean  @default(false) @map("phone_verified")
+  role      UserRole
+
+  events    Event[]
+  scans     InvitationScan[]
+  audits    AuditLog[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model PhoneOtp {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  otpHash   String   @map("otp_hash")
+  expiresAt DateTime @map("expires_at")
+  attempts  Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@map("phone_otp")
+}
+
+model Event {
+  id              String      @id @default(uuid())
+  organizerId     String      @map("organizer_id")
+  organizer       User        @relation(fields: [organizerId], references: [id])
+
+  title           String
+  venue           String
+  eventDate       DateTime    @map("event_date")
+  allowReentry    Boolean     @default(false) @map("allow_reentry")
+  entryCutoffTime DateTime?   @map("entry_cutoff_time")
+
+  status          EventStatus @default(DRAFT)
+
+  invitations     Invitation[]
+  scans           InvitationScan[]
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("events")
+}
+
+model Invitation {
+  id            String            @id @default(uuid())
+  eventId       String            @map("event_id")
+  event         Event             @relation(fields: [eventId], references: [id])
+
+  guestName     String?           @map("guest_name")
+  guestPhone    String            @map("guest_phone")
+  ticketType    TicketType        @map("ticket_type")
+  price         Decimal           @default(0)
+
+  inviteCode    String            @unique @map("invite_code")
+  qrToken       String            @unique @map("qr_token")
+
+  status        InvitationStatus  @default(CREATED)
+  maxEntries    Int               @default(1) @map("max_entries")
+  entriesUsed   Int               @default(0) @map("entries_used")
+
+  sentAt        DateTime?         @map("sent_at")
+  checkedInAt   DateTime?         @map("checked_in_at")
+
+  scans         InvitationScan[]
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([eventId])
+  @@index([guestPhone])
+  @@map("invitations")
+}
+
+model InvitationScan {
+  id            String     @id @default(uuid())
+  invitationId  String     @map("invitation_id")
+  invitation    Invitation @relation(fields: [invitationId], references: [id])
+
+  eventId       String     @map("event_id")
+  event         Event      @relation(fields: [eventId], references: [id])
+
+  scannerId     String?    @map("scanner_id")
+  scanner       User?      @relation(fields: [scannerId], references: [id])
+
+  scanResult    ScanResult @map("scan_result")
+  scannedAt     DateTime   @default(now()) @map("scanned_at")
+  scannerIp     String?    @map("scanner_ip")
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([invitationId])
+  @@index([eventId])
+  @@map("invitation_scans")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?  @map("actor_id")
+  actor     User?    @relation(fields: [actorId], references: [id])
+
+  action    String
+  entity    String
+  entityId  String   @map("entity_id")
+  metadata  Json?
+  ip        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}

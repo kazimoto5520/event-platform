@@ -1,0 +1,16 @@
+node_modules
+.pnpm-store
+.pnpm-debug.log*
+
+.env
+.env.*
+!.env.example
+
+packages/db/prisma/migrations/**/migration_lock.toml
+packages/db/src/generated/*
+
+.next
+out
+.turbo
+
+*.log
