@@ -7,7 +7,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl">
           Event Platform
         </h1>
-        <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-lg">
+        <p className="text-4xl text-zinc-600 dark:text-zinc-400 max-w-lg">
           The simple way to manage your events and invitations.
         </p>
         <div className="flex gap-4">
