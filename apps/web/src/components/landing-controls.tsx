@@ -1,40 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useLocale } from "@/providers/locale-provider";
+import type { Locale } from "@event-platform/locale";
 
-type Lang = "en" | "sw";
 type Theme = "light" | "dark";
-
-const COPY = {
-  en: {
-    product: "Event Platform",
-    headline: "Secure event entry with QR validation.",
-    sub: "Create events, issue invitations, and scan guests with audit-grade tracking.",
-    primary: "Get started",
-    secondary: "Login",
-    bullets: ["Roles: Admin • Organizer • Scanner", "Invitations: VIP / Regular / Staff", "Scan-safe: duplicate detection + logs"],
-    theme: "Theme",
-    language: "Language",
-    light: "Light",
-    dark: "Dark",
-    english: "English",
-    swahili: "Swahili",
-  },
-  sw: {
-    product: "Event Platform",
-    headline: "Uthibitishaji salama wa kuingia kwa QR.",
-    sub: "Tengeneza matukio, toa mialiko, na skani wageni kwa ufuatiliaji wa kumbukumbu.",
-    primary: "Anza",
-    secondary: "Ingia",
-    bullets: ["Majukumu: Admin • Organizer • Scanner", "Mialiko: VIP / Regular / Staff", "Skani salama: kuzuia marudio + kumbukumbu"],
-    theme: "Mandhari",
-    language: "Lugha",
-    light: "Mwanga",
-    dark: "Giza",
-    english: "Kiingereza",
-    swahili: "Kiswahili",
-  },
-} as const;
 
 function setHtmlTheme(theme: Theme) {
   const root = document.documentElement;
@@ -42,16 +13,22 @@ function setHtmlTheme(theme: Theme) {
   else root.classList.remove("dark");
 }
 
-export default function LandingControls() {
-  const [theme, setTheme] = useState<Theme>("light");
-  const [lang, setLang] = useState<Lang>("en");
+function setLocaleCookie(locale: Locale) {
+  document.cookie = `locale=${locale}; path=/; max-age=${60 * 60 * 24 * 365}`;
+}
 
-  // init from localStorage
+export default function LandingControls() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const { locale, setLocale, t } = useLocale();
+
+  const [theme, setTheme] = useState<Theme>("light");
+
+  // init theme from localStorage
   useEffect(() => {
     const savedTheme = (localStorage.getItem("theme") as Theme | null) ?? "light";
-    const savedLang = (localStorage.getItem("lang") as Lang | null) ?? "en";
     setTheme(savedTheme);
-    setLang(savedLang);
     setHtmlTheme(savedTheme);
   }, []);
 
@@ -61,12 +38,22 @@ export default function LandingControls() {
     setHtmlTheme(theme);
   }, [theme]);
 
-  // persist lang
-  useEffect(() => {
-    localStorage.setItem("lang", lang);
-  }, [lang]);
+  function switchLocale(nextLocale: Locale) {
+    if (nextLocale === locale) return;
 
-  const t = useMemo(() => COPY[lang], [lang]);
+    // update provider state (instant UI update)
+    setLocale(nextLocale);
+
+    // update cookie for SSR
+    setLocaleCookie(nextLocale);
+
+    // update url: /en/... -> /sw/...
+    const segments = pathname.split("/");
+    segments[1] = nextLocale;
+
+    const nextPath = segments.join("/") || `/${nextLocale}`;
+    router.push(nextPath);
+  }
 
   return (
     <div className="flex items-center gap-2">
@@ -80,8 +67,9 @@ export default function LandingControls() {
               : "text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
           }`}
         >
-          {t.light}
+          {t.landing.ui.light}
         </button>
+
         <button
           onClick={() => setTheme("dark")}
           className={`rounded-full px-3 py-1 ${
@@ -90,26 +78,27 @@ export default function LandingControls() {
               : "text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
           }`}
         >
-          {t.dark}
+          {t.landing.ui.dark}
         </button>
       </div>
 
       {/* Language toggle */}
       <div className="flex items-center rounded-full border border-black/15 bg-white px-1 py-1 text-xs dark:border-white/15 dark:bg-black">
         <button
-          onClick={() => setLang("en")}
+          onClick={() => switchLocale("en")}
           className={`rounded-full px-3 py-1 ${
-            lang === "en"
+            locale === "en"
               ? "bg-black text-white dark:bg-white dark:text-black"
               : "text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
           }`}
         >
           EN
         </button>
+
         <button
-          onClick={() => setLang("sw")}
+          onClick={() => switchLocale("sw")}
           className={`rounded-full px-3 py-1 ${
-            lang === "sw"
+            locale === "sw"
               ? "bg-black text-white dark:bg-white dark:text-black"
               : "text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
           }`}

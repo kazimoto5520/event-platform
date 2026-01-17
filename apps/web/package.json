@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@event-platform/ui": "workspace:*",
+    "@event-platform/locale": "workspace:*",
     "next": "16.1.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"
