@@ -1,3 +1,5 @@
+import type { Dictionary } from "../get-dictionary";
+
 export const sw = {
   landing: {
     brand: "Event Platform",
@@ -22,4 +24,4 @@ export const sw = {
       swahili: "Kiswahili",
     },
   },
-} as const;
+} as const satisfies Dictionary;
