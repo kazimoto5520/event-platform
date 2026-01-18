@@ -1,4 +1,4 @@
-import { createApiClient, authApi } from "@event-platform/api-client";
+import { createApiClient, authApi, dashboardApi } from "@event-platform/api-client";
 
 export const api = createApiClient({
   baseURL: "/api/proxy",
@@ -13,3 +13,5 @@ export const api = createApiClient({
 });
 
 export const auth = authApi(api);
+export const dashboard = dashboardApi(api);
+

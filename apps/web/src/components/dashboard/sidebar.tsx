@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@event-platform/ui/cn";
+import Image from "next/image";
 
 type NavItem = {
   label: string;
@@ -53,23 +54,38 @@ export function DashboardSidebar({
     },
   ];
 
-  // Desktop sidebar (hover expand)
   const DesktopSidebar = (
     <aside
       className={cn(
         "group hidden h-screen flex-col border-r border-black/10 bg-white text-black dark:border-white/10 dark:bg-black dark:text-white",
         "md:flex",
-        "sticky top-0"
+        "sticky top-0",
       )}
     >
-      {/* width changes on hover */}
       <div className="flex h-full w-[72px] flex-col transition-all duration-200 group-hover:w-[260px]">
-        {/* Top logo */}
         <div className="flex h-16 items-center gap-3 px-4">
-          <div className="grid size-9 place-items-center rounded-xl border border-black/10 dark:border-white/10">
-            <span className="text-xs font-bold">EP</span>
+          {/* Logo */}
+          <div className="relative size-9 shrink-0">
+            {/* Light mode */}
+            <Image
+              src="/assets/event-platform-logo.png"
+              alt="Event Platform"
+              fill
+              className="object-contain dark:hidden"
+              priority
+            />
+
+            {/* Dark mode */}
+            <Image
+               src="/assets/event-platform-logo.png"
+              alt="Event Platform"
+              fill
+              className="hidden object-contain dark:block"
+              priority
+            />
           </div>
 
+          {/* Text appears only on hover */}
           <div className="min-w-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <p className="truncate text-sm font-semibold">Event Platform</p>
             <p className="truncate text-xs text-black/60 dark:text-white/60">
@@ -82,8 +98,19 @@ export function DashboardSidebar({
         <nav className="flex flex-1 flex-col gap-1 px-2 py-2">
           {items.map((item) => {
             const Icon = item.icon;
-            const active =
+
+            const matches =
               pathname === item.href || pathname?.startsWith(item.href + "/");
+
+            const matchesBest =
+              matches &&
+              !items.some(
+                (other) =>
+                  other !== item &&
+                  other.href.length > item.href.length &&
+                  (pathname === other.href ||
+                    pathname?.startsWith(other.href + "/")),
+              );
 
             return (
               <Link
@@ -92,8 +119,8 @@ export function DashboardSidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-2 text-sm transition",
                   "hover:bg-black/5 dark:hover:bg-white/10",
-                  active &&
-                    "bg-black text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-white"
+                  matchesBest &&
+                    "bg-black text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-white",
                 )}
               >
                 <Icon className="size-5 shrink-0" />
@@ -110,7 +137,7 @@ export function DashboardSidebar({
           <button
             className={cn(
               "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm transition",
-              "hover:bg-black/5 dark:hover:bg-white/10"
+              "hover:bg-black/5 dark:hover:bg-white/10",
             )}
           >
             <LogOut className="size-5 shrink-0" />
@@ -130,7 +157,7 @@ export function DashboardSidebar({
       <div
         className={cn(
           "fixed inset-0 z-40 bg-black/40 transition-opacity md:hidden",
-          isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onCloseMobile}
       />
@@ -138,7 +165,7 @@ export function DashboardSidebar({
       <aside
         className={cn(
           "fixed left-0 top-0 z-50 h-full w-[280px] border-r border-black/10 bg-white text-black transition-transform dark:border-white/10 dark:bg-black dark:text-white md:hidden",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          isMobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-16 items-center justify-between px-4">
@@ -165,8 +192,17 @@ export function DashboardSidebar({
         <nav className="flex flex-col gap-1 px-2 py-2">
           {items.map((item) => {
             const Icon = item.icon;
-            const active =
+            const matches =
               pathname === item.href || pathname?.startsWith(item.href + "/");
+            const matchesBest =
+              matches &&
+              !items.some(
+                (other) =>
+                  other !== item &&
+                  other.href.length > item.href.length &&
+                  (pathname === other.href ||
+                    pathname?.startsWith(other.href + "/")),
+              );
 
             return (
               <Link
@@ -176,8 +212,8 @@ export function DashboardSidebar({
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition",
                   "hover:bg-black/5 dark:hover:bg-white/10",
-                  active &&
-                    "bg-black text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-white"
+                  matchesBest &&
+                    "bg-black text-white dark:bg-white dark:text-black hover:bg-black dark:hover:bg-white",
                 )}
               >
                 <Icon className="size-5 shrink-0" />

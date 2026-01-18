@@ -1,4 +1,9 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { dashboard } from "@/lib/api";
 import Link from "next/link";
+import { Loader2 } from "lucide-react";
 
 type StatCard = {
   title: string;
@@ -8,32 +13,45 @@ type StatCard = {
 };
 
 export default function DashboardPage() {
-  // Later you can fetch these from API:
-  // - /api/events
-  // - /api/scans/validate logs summary
-  // - /api/events/:id/invitations summary
+  const { data: summary, isLoading } = useQuery({
+    queryKey: ["dashboard", "summary"],
+    queryFn: () => dashboard.getSummary(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] w-full items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-black/20 dark:text-white/20" />
+      </div>
+    );
+  }
+
+  const events = summary?.events;
+  const invitations = summary?.invitations;
+  const scans = summary?.scans;
+
   const stats: StatCard[] = [
     {
       title: "Live Events",
-      value: "0",
+      value: events?.byStatus.LIVE.toString() ?? "0",
       hint: "Events currently open for scanning",
       action: { label: "View events", href: "/dashboard/events" },
     },
     {
       title: "Draft Events",
-      value: "0",
+      value: events?.byStatus.DRAFT.toString() ?? "0",
       hint: "Not published yet (scanning disabled)",
       action: { label: "Create event", href: "/dashboard/events/new" },
     },
     {
       title: "Invitations Issued",
-      value: "0",
+      value: invitations?.byStatus.CREATED.toString() ?? "0",
       hint: "Total invitations created across events",
       action: { label: "Manage invitations", href: "/dashboard/events" },
     },
     {
       title: "Checked In",
-      value: "0",
+      value: scans?.byResult.SUCCESS.toString() ?? "0",
       hint: "Guests successfully validated via QR scan",
       action: { label: "View scans", href: "/dashboard/scans" },
     },
@@ -63,17 +81,17 @@ export default function DashboardPage() {
   ];
 
   const statusBreakdown = [
-    { label: "DRAFT", value: 0 },
-    { label: "LIVE", value: 0 },
-    { label: "COMPLETED", value: 0 },
-    { label: "CANCELLED", value: 0 },
+    { label: "DRAFT", value: events?.byStatus.DRAFT ?? 0 },
+    { label: "LIVE", value: events?.byStatus.LIVE ?? 0 },
+    { label: "COMPLETED", value: events?.byStatus.COMPLETED ?? 0 },
+    { label: "CANCELLED", value: events?.byStatus.CANCELLED ?? 0 },
   ];
 
   const scanBreakdown = [
-    { label: "SUCCESS", value: 0 },
-    { label: "DUPLICATE", value: 0 },
-    { label: "INVALID", value: 0 },
-    { label: "EXPIRED", value: 0 },
+    { label: "SUCCESS", value: scans?.byResult.SUCCESS ?? 0 },
+    { label: "DUPLICATE", value: scans?.byResult.DUPLICATE ?? 0 },
+    { label: "INVALID", value: scans?.byResult.INVALID ?? 0 },
+    { label: "EXPIRED", value: scans?.byResult.EXPIRED ?? 0 },
   ];
 
   return (
@@ -179,8 +197,8 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-4 rounded-2xl border border-black/10 p-3 text-xs text-black/60 dark:border-white/10 dark:text-white/60">
-            Scanning is enabled only when an event is <b>LIVE</b>.
-            Duplicate scans are blocked automatically.
+            Scanning is enabled only when an event is <b>LIVE</b>. Duplicate
+            scans are blocked automatically.
           </div>
         </div>
 
@@ -245,8 +263,8 @@ export default function DashboardPage() {
 
       {/* Bottom note */}
       <div className="rounded-3xl border border-black/10 p-4 text-xs text-black/60 dark:border-white/10 dark:text-white/60">
-        Tip: For secure entry control, always publish events to <b>LIVE</b> before
-        allowing scanners to validate QR codes.
+        Tip: For secure entry control, always publish events to <b>LIVE</b>{" "}
+        before allowing scanners to validate QR codes.
       </div>
     </div>
   );

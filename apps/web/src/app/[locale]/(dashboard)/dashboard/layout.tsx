@@ -33,7 +33,7 @@ export default function DashboardLayout({
 
           <main className="flex-1 p-4 md:p-6">
             {/* Container */}
-            <div className="mx-auto w-full max-w-6xl">{children}</div>
+            <div className="w-full">{children}</div>
           </main>
         </div>
       </div>
