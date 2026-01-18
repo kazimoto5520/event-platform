@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { loginRequestSchema, type LoginRequest } from "@event-platform/validators";
 import { auth } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
+import { Button } from "@event-platform/ui/button";
+import { Input } from "@event-platform/ui/input";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,10 +50,9 @@ export default function LoginPage() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-medium">Phone</label>
-              <input
+              <Input
                 {...form.register("phone")}
                 placeholder="255712345678"
-                className="w-full rounded-2xl border border-black/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-black dark:border-white/15 dark:focus:border-white"
               />
               {form.formState.errors.phone && (
                 <p className="text-xs text-black/60 dark:text-white/60">
@@ -62,11 +63,10 @@ export default function LoginPage() {
 
             <div className="space-y-1">
               <label className="text-sm font-medium">Password</label>
-              <input
+              <Input
                 {...form.register("password")}
                 type="password"
                 placeholder="••••••••"
-                className="w-full rounded-2xl border border-black/15 bg-transparent px-4 py-3 text-sm outline-none focus:border-black dark:border-white/15 dark:focus:border-white"
               />
               {form.formState.errors.password && (
                 <p className="text-xs text-black/60 dark:text-white/60">
@@ -82,13 +82,9 @@ export default function LoginPage() {
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="w-full rounded-full bg-black px-6 py-3 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-black"
-            >
+            <Button type="submit" disabled={loginMutation.isPending} className="w-full">
               {loginMutation.isPending ? "Signing in..." : "Sign in"}
-            </button>
+            </Button>
           </form>
 
           <div className="text-center text-sm text-black/60 dark:text-white/60">
