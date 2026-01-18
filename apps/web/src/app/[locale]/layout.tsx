@@ -41,7 +41,7 @@ export default async function LocaleRootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${jetbrains.variable} font-sans antialiased`}
+        className={`${poppins.variable} ${jetbrains.variable} font-mono antialiased`}
       >
         <QueryProvider>
           <LocaleProvider initialLocale={locale}>{children}</LocaleProvider>
