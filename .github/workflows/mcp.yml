@@ -1,0 +1,50 @@
+name: MCP CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mcp/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".github/workflows/mcp.yml"
+
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/mcp/**"
+      - "packages/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "turbo.json"
+      - ".github/workflows/mcp.yml"
+
+jobs:
+  mcp:
+    runs-on: ubuntu-latest
+
+    env:
+      API_BASE_URL: "http://localhost:4000"
+      LOG_PRETTY: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (mcp)
+        run: pnpm --filter mcp build
