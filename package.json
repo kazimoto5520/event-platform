@@ -15,5 +15,10 @@
   "devDependencies": {
     "tsx": "^4.21.0",
     "turbo": "^2.7.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "zod": "^4.3.5"
+    }
   }
 }
