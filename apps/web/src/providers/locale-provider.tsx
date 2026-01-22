@@ -11,6 +11,16 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
+function readCookieLocale(): Locale | null {
+  const cookieLocale = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("locale="))
+    ?.split("=")[1];
+
+  if (cookieLocale === "en" || cookieLocale === "sw") return cookieLocale;
+  return null;
+}
+
 export function LocaleProvider({
   children,
   initialLocale,
@@ -18,19 +28,11 @@ export function LocaleProvider({
   children: React.ReactNode;
   initialLocale: Locale;
 }) {
-  const [locale, setLocale] = useState<Locale>(initialLocale);
-
-  // Sync with cookie (client-side)
-  useEffect(() => {
-    const cookieLocale = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("locale="))
-      ?.split("=")[1];
-
-    if (cookieLocale === "en" || cookieLocale === "sw") {
-      setLocale(cookieLocale);
-    }
-  }, []);
+  const [locale, setLocale] = useState<Locale>(() => {
+    // Only runs on client
+    if (typeof document === "undefined") return initialLocale;
+    return readCookieLocale() ?? initialLocale;
+  });
 
   // Persist to cookie when changed
   useEffect(() => {
