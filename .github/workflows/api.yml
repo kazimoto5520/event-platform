@@ -24,6 +24,12 @@ on:
 jobs:
   api:
     runs-on: ubuntu-latest
+    env:
+      BEEM_API_KEY: "dummy"
+      BEEM_SECRET_KEY: "dummy"
+      BEEM_URL: "https://example.com"
+      JWT_SECRET: "dummy"
+      DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
     steps:
       - name: Checkout
